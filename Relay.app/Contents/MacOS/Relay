@@ -1,0 +1,26 @@
+#!/bin/bash
+DIR="$(cd "$(dirname "$0")" && pwd)"
+STORED=""
+if [[ -f "$DIR/../Resources/project-root" ]]; then
+  STORED="$(tr -d '[:space:]' < "$DIR/../Resources/project-root")"
+fi
+RELATIVE="$(cd "$DIR/../../.." && pwd)"
+PROJECT=""
+if [[ -n "$STORED" && -f "$STORED/app/__main__.py" ]]; then
+  PROJECT="$STORED"
+elif [[ -f "$RELATIVE/app/__main__.py" ]]; then
+  PROJECT="$RELATIVE"
+fi
+if [[ -z "$PROJECT" ]]; then
+  osascript -e 'display dialog "找不到 Relay 的项目目录。" buttons {"好"} default button 1 with title "Relay"'
+  exit 1
+fi
+PY="$PROJECT/.venv/bin/python"
+if [[ ! -x "$PY" ]]; then
+  osascript -e 'display dialog "还没有安装运行环境。请先在项目目录创建 .venv 并安装 requirements.txt。" buttons {"好"} default button 1 with title "Relay"'
+  exit 1
+fi
+mkdir -p "$PROJECT/data"
+cd "$PROJECT"
+export PYTHONPATH="$PROJECT"
+exec "$PY" -u -m app.desktop >>"$PROJECT/data/desktop.log" 2>&1

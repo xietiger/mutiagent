@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+data/
+artifacts/
+*.pyc
+bin/cursor-agent.path
+.DS_Store

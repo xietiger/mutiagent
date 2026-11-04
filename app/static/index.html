@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f7f7f5">
+  <meta name="application-name" content="Relay">
+  <title>Relay · 本地多 Agent 控制台</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=1">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="/static/styles.css?v=52">
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="icon-rail" aria-label="全局导航">
+      <a class="rail-logo" href="#workspace" aria-label="回到工作台">
+        <svg viewBox="0 0 40 40" role="img" aria-label="Relay">
+          <defs>
+            <linearGradient id="relay-logo-bg" x1="6" y1="3" x2="34" y2="37" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#0b0c0d"/>
+              <stop offset="1" stop-color="#000000"/>
+            </linearGradient>
+          </defs>
+          <rect x="1" y="1" width="38" height="38" rx="11" fill="url(#relay-logo-bg)"/>
+          <g class="logo-flower">
+            <path class="logo-petal" d="M20 5.8C14.6 9.2 13.8 14.1 20 18.5c6.2-4.4 5.4-9.3 0-12.7Z"/>
+            <path class="logo-petal-line" d="M20 9.1v6.9"/>
+            <path class="logo-petal" d="M20 5.8C14.6 9.2 13.8 14.1 20 18.5c6.2-4.4 5.4-9.3 0-12.7Z" transform="rotate(90 20 20)"/>
+            <path class="logo-petal-line" d="M20 9.1v6.9" transform="rotate(90 20 20)"/>
+            <path class="logo-petal" d="M20 5.8C14.6 9.2 13.8 14.1 20 18.5c6.2-4.4 5.4-9.3 0-12.7Z" transform="rotate(180 20 20)"/>
+            <path class="logo-petal-line" d="M20 9.1v6.9" transform="rotate(180 20 20)"/>
+            <path class="logo-petal" d="M20 5.8C14.6 9.2 13.8 14.1 20 18.5c6.2-4.4 5.4-9.3 0-12.7Z" transform="rotate(270 20 20)"/>
+            <path class="logo-petal-line" d="M20 9.1v6.9" transform="rotate(270 20 20)"/>
+            <circle class="logo-core" cx="20" cy="20" r="3.35"/>
+            <path class="logo-seed" d="m20 17.9 1.35 2.1L20 22.1l-1.35-2.1Z"/>
+          </g>
+        </svg>
+      </a>
+      <div class="rail-items">
+        <a class="rail-button active" href="#workspace" title="工作台" aria-label="工作台">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3.5 10 8.5-7 8.5 7v10.5H15v-6H9v6H3.5z"/></svg>
+        </a>
+        <button class="rail-button" id="rail-history" type="button" title="最近任务" aria-label="最近任务">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.3 2"/></svg>
+        </button>
+        <button class="rail-button" id="rail-agents" type="button" title="Agent 运行环境" aria-label="Agent 运行环境">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.5"/><circle cx="17" cy="9.5" r="2.5"/><path d="M2.8 20c.4-4 2.3-6 5.2-6s4.8 2 5.2 6M15 15c2.8-.5 4.8.8 5.6 3.5"/></svg>
+          <span class="rail-count" id="rail-agent-count">0</span>
+        </button>
+      </div>
+      <button class="rail-button rail-more" type="button" title="更多设置" aria-label="更多设置" id="rail-settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+      </button>
+    </nav>
+
+    <aside class="thread-sidebar">
+      <header class="sidebar-head">
+        <a class="sidebar-brand" href="#workspace">
+          <strong>Relay</strong>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m5 6 3 3 3-3"/></svg>
+        </a>
+        <button class="icon-button" id="probe-all" type="button" title="重新探测 Agent" aria-label="重新探测 Agent">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M15.5 6.5A6.5 6.5 0 1 0 16 12"/><path d="M15.5 2.5v4h-4"/></svg>
+        </button>
+      </header>
+
+      <button class="new-task-button" id="new-task" type="button">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16.5 3.5H6L3.5 6v10.5H14L16.5 14z"/><path d="M6 3.5v10M3.5 6h10"/></svg>
+        新任务
+      </button>
+
+      <div class="sidebar-scroll">
+        <section class="sidebar-section">
+          <h2>工作区</h2>
+          <div class="workspace-row">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5h5l1.7 2h8.3v8.2a1.8 1.8 0 0 1-1.8 1.8H4.3a1.8 1.8 0 0 1-1.8-1.8z"/></svg>
+            <span>mutiagent</span>
+            <i title="本地工作区"></i>
+          </div>
+          <button class="sidebar-link" id="open-config" type="button">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="14.5" cy="8" r="2.2"/><path d="M2.5 16c.4-3 2.1-4.5 4.5-4.5s4.1 1.5 4.5 4.5M12 13c2.7-.6 4.8.4 5.5 2.6"/></svg>
+            <span>Agent 与环境</span>
+            <small id="connection-copy">正在连接</small>
+          </button>
+        </section>
+
+        <section class="sidebar-section task-history">
+          <header>
+            <h2>最近</h2>
+            <span class="sidebar-count" id="task-count">0</span>
+          </header>
+          <div id="task-list" class="task-list">
+            <p class="sidebar-empty">还没有任务</p>
+          </div>
+        </section>
+      </div>
+
+      <footer class="sidebar-foot">
+        <span class="local-dot"></span>
+        <span>仅在本机运行</span>
+        <code>127.0.0.1:8765</code>
+      </footer>
+    </aside>
+
+    <main class="workspace">
+      <header class="workspace-header">
+        <div class="thread-heading">
+          <span class="thread-icon">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h14v9H8l-4.5 3v-3H3z"/></svg>
+          </span>
+          <div>
+            <strong id="thread-title">新任务</strong>
+            <span id="thread-meta">选择一个任务，或开始新的并行评审</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <span class="ready-state"><i></i><b id="ready-count">—</b> Agents 就绪</span>
+          <button class="header-button" id="context-toggle" type="button" aria-label="打开运行配置" aria-expanded="false">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/><circle cx="7" cy="5" r="1.6"/><circle cx="13" cy="10" r="1.6"/><circle cx="9" cy="15" r="1.6"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="thread-scroll" id="workspace">
+        <div class="thread-content">
+          <div id="task-detail" class="detail">
+            <div class="empty-thread">
+              <span class="empty-mark">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14v9H9l-4 3v-3H5z"/><path d="M8.5 10h7M8.5 13h4.5"/></svg>
+              </span>
+              <p class="eyebrow">PARALLEL WORKSPACE</p>
+              <h1>今天想让哪些 Agent<br>一起工作？</h1>
+              <p class="empty-copy">写下一个问题，选择一个或多个 Agent。它们会独立运行，结果会在这里汇总。</p>
+              <div class="quick-prompts">
+                <button type="button" data-prompt="评审当前项目，优先检查安全风险、边界条件和测试缺口。">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 16 5v4.6c0 3.8-2.4 6.4-6 7.9-3.6-1.5-6-4.1-6-7.9V5z"/><path d="m7.3 9.8 1.8 1.8 3.8-3.9"/></svg>
+                  安全评审
+                </button>
+                <button type="button" data-prompt="阅读当前项目并给出最重要的结构改进建议，说明理由和影响范围。">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h14v11H3z"/><path d="M6 7h8M6 10h5"/></svg>
+                  架构建议
+                </button>
+                <button type="button" data-prompt="检查现有实现与需求是否有偏差，并列出最需要补充的测试。">
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 2 2-4 4-2-2M9 5l8 8-3 3-8-8"/><path d="m3 14 3 3"/></svg>
+                  测试检查
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <details id="compare-panel" class="compare-panel" hidden>
+            <summary>
+              <span>
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16V9M10 16V4M16 16v-4"/><path d="M2.5 16.5h15"/></svg>
+                多 Agent 对照
+              </span>
+              <span id="compare-summary">查看共识、差异与冲突</span>
+            </summary>
+            <div id="compare" class="compare-content"></div>
+          </details>
+        </div>
+      </section>
+
+      <div class="composer-dock">
+        <form id="task-form" class="composer">
+          <textarea name="prompt" required rows="1" placeholder="和 Agent 一起工作…" aria-label="任务内容"></textarea>
+
+          <div id="composer-options" class="composer-options" hidden>
+            <label class="field">
+              <span class="field-label">任务名称 <em>可选</em></span>
+              <input name="title" autocomplete="off" placeholder="不填写时会从任务内容自动生成">
+            </label>
+            <label class="field">
+              <span class="field-label">上下文目录</span>
+              <input name="context_path" autocomplete="off" placeholder="/绝对路径/到项目">
+            </label>
+            <label class="fanout-option">
+              <input type="checkbox" name="fanout">
+              <span class="switch" aria-hidden="true"></span>
+              <span>全量分发给所有可用 Agent</span>
+            </label>
+          </div>
+
+          <div class="composer-toolbar">
+            <div class="composer-tools">
+              <button class="tool-button" id="composer-add" type="button" aria-label="任务设置" aria-expanded="false">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>
+              </button>
+              <button class="tool-button agent-picker" id="agent-picker" type="button">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="7" cy="7" r="3"/><circle cx="14.5" cy="8" r="2.2"/><path d="M2.5 16c.4-3 2.1-4.5 4.5-4.5s4.1 1.5 4.5 4.5M12 13c2.7-.6 4.8.4 5.5 2.6"/></svg>
+                <span id="agent-picker-copy">选择 Agent</span>
+              </button>
+              <label class="mode-control">
+                <span class="sr-only">执行方式</span>
+                <select name="execution_mode">
+                  <option value="readonly">只读评审</option>
+                  <option value="worktree">独立 worktree</option>
+                </select>
+              </label>
+            </div>
+            <div class="composer-submit">
+              <span id="call-count">将调用 0 个 Agent</span>
+              <button type="submit" class="send-button" aria-label="开始并行任务">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15V4M5.5 8.5 10 4l4.5 4.5"/></svg>
+              </button>
+            </div>
+          </div>
+          <p id="notice" class="notice" role="alert"></p>
+        </form>
+        <p class="composer-footnote">Agent 使用独立上下文运行，结果不会自动写入当前工作区</p>
+      </div>
+    </main>
+  </div>
+
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="context-drawer" id="context-drawer" aria-hidden="true" aria-label="运行配置">
+    <header class="drawer-head">
+      <div>
+        <span class="drawer-kicker">WORKSPACE CONTEXT</span>
+        <h2>运行配置</h2>
+      </div>
+      <button class="icon-button" id="drawer-close" type="button" aria-label="关闭运行配置">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>
+      </button>
+    </header>
+
+    <div class="drawer-body">
+      <div class="drawer-summary">
+        <div>
+          <strong id="agent-total">—</strong>
+          <span>Agents 可用</span>
+        </div>
+        <p>为本次任务选择独立运行的 Agent</p>
+      </div>
+
+      <section class="drawer-section">
+        <header class="drawer-section-head">
+          <h3>Agents</h3>
+          <div class="agent-filters" role="group" aria-label="Agent 筛选">
+            <button class="active" type="button" data-agent-filter="ready">可用</button>
+            <button type="button" data-agent-filter="all">全部</button>
+          </div>
+        </header>
+        <div id="agents" class="agents">
+          <div class="agent-loading"><span></span><span></span><span></span></div>
+        </div>
+      </section>
+
+      <section class="drawer-section drawer-section-compact">
+        <header class="drawer-section-head">
+          <h3>当前输出</h3>
+          <span>自动同步</span>
+        </header>
+        <div class="drawer-list-row">
+          <span class="drawer-row-icon">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3.5h9l3 3v10H4z"/><path d="M13 3.5v3h3"/></svg>
+          </span>
+          <div><strong id="drawer-output-title">尚无运行结果</strong><span id="drawer-output-meta">开始任务后会出现在这里</span></div>
+        </div>
+      </section>
+
+      <section class="drawer-section drawer-section-compact">
+        <header class="drawer-section-head">
+          <h3>任务来源</h3>
+          <button class="mini-add" id="drawer-edit-source" type="button" aria-label="编辑任务参数">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>
+          </button>
+        </header>
+        <button class="drawer-source-row" id="drawer-source" type="button">
+          <span class="drawer-row-icon">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5h5l1.7 2h8.3v8.2a1.8 1.8 0 0 1-1.8 1.8H4.3a1.8 1.8 0 0 1-1.8-1.8z"/></svg>
+          </span>
+          <span>选择项目目录</span>
+        </button>
+      </section>
+
+      <details class="custom">
+        <summary>添加自定义运行器 <span>+</span></summary>
+        <form id="custom-form">
+          <label class="field">
+            <span class="field-label">名称</span>
+            <input name="name" required placeholder="我的 Agent">
+          </label>
+          <label class="field">
+            <span class="field-label">类型</span>
+            <select name="driver">
+              <option value="custom_cli">CLI</option>
+              <option value="http">HTTP</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label">绝对路径或本机 URL</span>
+            <input name="executable" required placeholder="/abs/path 或 http://127.0.0.1:9/run">
+          </label>
+          <button type="submit" class="drawer-submit">登记并探测</button>
+        </form>
+      </details>
+      <p id="drawer-notice" class="drawer-notice" role="alert"></p>
+    </div>
+    <footer class="drawer-footer">
+      <span>已选择 <strong id="drawer-selection-count">0</strong> 个 Agent</span>
+      <button type="button" id="drawer-done">完成</button>
+    </footer>
+  </aside>
+
+  <script src="/static/app.js?v=16"></script>
+</body>
+</html>
